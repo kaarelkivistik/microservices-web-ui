@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { connect } from 'react-redux';
 
 import Paper from 'material-ui/lib/paper';
 import Avatar from 'material-ui/lib/avatar';
@@ -8,7 +9,7 @@ import Divider from 'material-ui/lib/divider';
 import CommunicationChatBubble from 'material-ui/lib/svg-icons/communication/chat-bubble';
 import TextField from 'material-ui/lib/text-field';
 
-import Message from './message.jsx';
+import { sendMessage } from '../actions.jsx';
 
 const chatStyle = {
 	padding: 15
@@ -27,12 +28,16 @@ const noMessages = <div style={jumbotronStyle}>No messages</div>;
 class Chat extends Component {
 	render() {
 		const { conversation, partner, sendMessage } = this.props;
+		const { buckets, messages } = conversation;
 		
-		const messages = conversation.map((message, index) => <Message {...message} key={index}/>);
+		const messageElements = [];
+		
+		buckets.forEach(({messages}) => messages.forEach(message => messageElements.push(<Message {...message} key={message.id}/>)));
+		messages.forEach((message, index) => messageElements.push(<Message {...message} key={index}/>));
 		
 		return (
 			<Paper style={chatStyle}>
-				{messages.length > 0 ? messages : noMessages}
+				{messageElements.length > 0 ? messageElements : noMessages}
 				
 				<Divider style={{marginLeft: -15, marginRight: -15}}/>
 				
@@ -41,6 +46,16 @@ class Chat extends Component {
 		);
 	}
 }
+
+function Message(props) {
+	const { id, text, incoming } = props;
+	
+	return (
+		<div style={{textAlign: incoming ? 'right' : 'left', marginBottom: 10}}>
+			{text}
+		</div>
+	);
+};
 
 class MessageBox extends Component {
 	constructor(props) {
@@ -82,4 +97,4 @@ class MessageBox extends Component {
 	}
 }
 
-export default Chat;
+export default connect(state => state, {sendMessage})(Chat);

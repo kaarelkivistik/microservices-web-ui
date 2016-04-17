@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { connect } from 'react-redux';
 
 import { teal50 } from 'material-ui/lib/styles/colors';
 
@@ -11,45 +12,56 @@ import ListItem from 'material-ui/lib/lists/list-item';
 import Divider from 'material-ui/lib/divider';
 import FlatButton from 'material-ui/lib/flat-button';
 
+import { fetchBuckets, setActiveConversation, createConversation } from '../actions.jsx';
+
 const newIcon = <FontIcon className="material-icons">home</FontIcon>;
 
 const newConversationTextFieldStyle = {
 	padding: "0px 16px 5px 16px"
 };
 
-export default function Conversations(props) {
-	const { conversations, conversationOrder, activeConversation, setActiveConversation, createConversation } = props;
+export default connect(state => state, {
+	fetchBuckets, 
+	setActiveConversation, 
+	createConversation
+})(function Conversations(props) {
+	const { conversations, conversationOrder, activeConversation, fetchBuckets, setActiveConversation, createConversation } = props;
 	
 	const numberOfConversations = conversationOrder.length;
 	
 	return (
 		<Paper zDepth={1}>
 			<List>
-				<ListItem disabled style={newConversationTextFieldStyle}><NewConversationBox createConversation={createConversation}/></ListItem>
+				<ListItem disabled style={newConversationTextFieldStyle}>
+					<NewConversationBox 
+						createConversation={createConversation} 
+						setActiveConversation={setActiveConversation}/>
+				</ListItem>
 				<Divider/>
 				
 				{numberOfConversations == 0 ? <ListItem style={{textAlign: "center"}} disabled><FlatButton disabled label="You have no conversations"/></ListItem> : null}
 				
 				{conversationOrder.map(name => {
 					const conversation = conversations[name];
-					const numberOfMessages = conversation.length;
+					const { id, lastMessage } = conversation;
 					
 					return (
 						<ListItem
 							key={name}
 							onClick={(name => {
+								fetchBuckets(name, id);
 								setActiveConversation(name);
 							}).bind(this, name)}
 							leftAvatar={<Avatar>{name[0].toUpperCase()}</Avatar>}
 							primaryText={name}
-							secondaryText={numberOfMessages > 0 ? conversation[numberOfMessages - 1].text : undefined}
+							secondaryText={lastMessage ? lastMessage.text : undefined}
 							style={{backgroundColor: activeConversation === name ? teal50 : 'white'}} />
 					);
 				})}
 			</List>
 		</Paper>
 	);
-};
+});
 
 class NewConversationBox extends Component {
 	constructor(props) {
@@ -71,10 +83,11 @@ class NewConversationBox extends Component {
 	
 	onKeyDown(event) {
 		if(event.keyCode == 13) {
-			const { createConversation } = this.props;
+			const { createConversation, setActiveConversation } = this.props;
 			const { name } = this.state;
 			
 			createConversation(name);
+			setActiveConversation(name);
 			
 			this.setState({
 				name: ""

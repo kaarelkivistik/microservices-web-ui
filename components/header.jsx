@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 import Paper from 'material-ui/lib/paper';
 import Avatar from 'material-ui/lib/avatar';
@@ -8,6 +9,8 @@ import Divider from 'material-ui/lib/divider';
 import CommunicationChatBubble from 'material-ui/lib/svg-icons/communication/chat-bubble';
 import TextField from 'material-ui/lib/text-field';
 import FlatButton from 'material-ui/lib/flat-button';
+
+import { signIn } from '../actions.jsx';
 
 const headerStyle = {
 	paddingLeft: 20,
@@ -30,9 +33,8 @@ const brandStyle = {
 	textTransform: "uppercase"
 };
 
-export default function Header(props) {
-	const { user, signIn } = props;
-	const { name } = user;
+export default connect(state => state.user, {signIn})(function Header(props) {
+	const { name, signIn } = props;
 	
 	return (
 		<Paper style={headerStyle}>
@@ -50,4 +52,4 @@ export default function Header(props) {
 			</div>
 		</Paper>
 	);
-};
+});

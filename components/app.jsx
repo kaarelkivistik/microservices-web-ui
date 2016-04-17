@@ -3,8 +3,6 @@ import { connect } from 'react-redux';
 
 import Paper from 'material-ui/lib/paper';
 
-import { signIn, createConversation, setActiveConversation } from '../actions.jsx';
-
 import Conversations from './conversations.jsx';
 import Chat from './chat.jsx';
 import Header from './header.jsx';
@@ -30,19 +28,18 @@ const noConversationPaper = (
 class Application extends Component {
 	
 	render() {
-		const { user, conversations, conversationOrder, activeConversation, dispatch } = this.props;
+		const { user, 
+			conversations, 
+			activeConversation
+		} = this.props;
+		
 		const { name: activeUserName } = user;
 		
 		return (
 			<div style={containerStyle}>
 				<div className="row">
 					<div className="col-xs-12">
-						<Header user={user} signIn={name => {
-							dispatch(signIn(name));
-							
-							if(conversationOrder.length > 0)
-								dispatch(setActiveConversation(conversationOrder[0]));
-						}}/>
+						<Header/>
 					</div>
 				</div>
 				
@@ -56,25 +53,13 @@ class Application extends Component {
 				
 				{activeUserName ? <div className="row">
 					<div className="col-xs-12 col-sm-4 col-md-3">
-						<Conversations 
-							conversations={conversations}
-							conversationOrder={conversationOrder}
-							activeConversation={activeConversation} 
-							setActiveConversation={name => {
-								dispatch(setActiveConversation(name));
-							}} createConversation={name => {
-								dispatch(createConversation(name));
-								dispatch(setActiveConversation(name));
-							}}/>
+						<Conversations/>
 					</div>
 					<div className="col-xs-12 col-sm-8 col-md-9">
 						{Object.keys(conversations).filter(name => name == activeConversation).map(name => (
 								<Chat key={name} 
 									conversation={conversations[name]}
-									partner={activeConversation}
-									sendMessage={(name, text) => {
-										dispatch(sendMessage(name, text));
-									}}/>
+									partner={activeConversation}/>
 							)
 						).shift() || noConversationPaper}
 					</div>
